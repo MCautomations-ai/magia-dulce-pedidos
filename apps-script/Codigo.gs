@@ -58,7 +58,8 @@ function doPost(e) {
 /* ---------- Productos ---------- */
 
 // Columnas de la hoja Productos (la primera fila son los títulos, en cualquier orden):
-// ID | Categoría | Producto | Tamaño | Descripción | Precio | Foto | Destacado | Agotado
+// ID | Categoría | Producto | Tamaño | Descripción | Precio | Foto | Destacado | Agotado | Anticipación
+// Anticipación: días que necesita ese producto (0 = se puede pedir para hoy). Vacío: la anticipación general de Netlify.
 function leerProductos() {
   var hoja = SpreadsheetApp.getActive().getSheetByName(HOJA_PRODUCTOS);
   if (!hoja) throw new Error('No encuentro la hoja "' + HOJA_PRODUCTOS + '"');
@@ -67,7 +68,7 @@ function leerProductos() {
   var t = datos[0].map(function (h) { return normal(h); });
   var c = function (nombre) { return t.indexOf(nombre); };
   var ci = { id: c('id'), cat: c('categoria'), name: c('producto'), size: c('tamano'), desc: c('descripcion'),
-    price: c('precio'), foto: c('foto'), hot: c('destacado'), off: c('agotado') };
+    price: c('precio'), foto: c('foto'), hot: c('destacado'), off: c('agotado'), lead: c('anticipacion') };
   if (ci.name < 0 || ci.price < 0) throw new Error('Faltan las columnas Producto o Precio');
 
   var items = [];
@@ -92,7 +93,8 @@ function leerProductos() {
       price: Math.round(price),
       foto: ci.foto >= 0 ? String(fila[ci.foto] || '').trim() : '',
       hot: ci.hot >= 0 && si(fila[ci.hot]),
-      off: ci.off >= 0 && si(fila[ci.off])
+      off: ci.off >= 0 && si(fila[ci.off]),
+      lead: ci.lead >= 0 ? dias(fila[ci.lead]) : null
     });
   }
   return items;
@@ -154,6 +156,10 @@ function normal(s) {
 }
 function si(v) {
   return v === true || /^(si|sí|x|true|1)$/i.test(String(v || '').trim());
+}
+function dias(v) {
+  var s = String(v == null ? '' : v).replace(/[^\d]/g, '');
+  return s === '' ? null : Math.min(60, parseInt(s, 10));
 }
 function fechaLinda(iso) {
   var m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(String(iso || ''));

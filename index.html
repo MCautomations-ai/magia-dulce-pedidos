@@ -135,6 +135,9 @@ button{cursor:pointer}
 .pr{display:flex;flex-wrap:wrap;align-items:baseline;gap:0 8px}
 .price{font-weight:800;font-size:1.2rem;font-variant-numeric:tabular-nums}
 .pr small{font-weight:600;font-size:.8rem;color:var(--muted)}
+.lead{font-size:.8rem;font-weight:700;color:var(--muted)}
+.lead.today{color:var(--ok)}
+.lead.today::before{content:"● "}
 .buy .btn{width:100%}
 .sold .stage{opacity:.45}.sold h3{color:var(--muted)}
 .soldtag{text-align:center;font-weight:700;color:var(--muted);padding:8px;border:1.5px dashed var(--line);border-radius:999px;font-size:.9rem}
@@ -447,7 +450,8 @@ function buildGroups(items){
     if(!g.desc&&it.desc)g.desc=it.desc;
     if(!g.img)g.img=fotoSrc(it.foto);
     if(it.hot)g.hot=true;
-    var sz=splitSize(it.size),v={id:String(it.id),label:sz[0],extra:sz[1],price:Number(it.price)||0,off:!!it.off,g:g};
+    var sz=splitSize(it.size),ld=it.lead!=null&&it.lead!==''&&isFinite(+it.lead)?Math.max(0,+it.lead):CFG.anticipacion;
+    var v={id:String(it.id),label:sz[0],extra:sz[1],price:Number(it.price)||0,off:!!it.off,lead:ld,g:g};
     g.vars.push(v);byVar[v.id]=v;
   });
   list.forEach(function(g){g.off=g.vars.every(function(v){return v.off})});
@@ -477,7 +481,7 @@ function render(focus,pop){
     return '<article class="card'+(g.off?' sold':'')+(pop?' in':'')+'"'+(pop?' style="animation-delay:'+n*45+'ms"':'')+'><div class="stage">'+(g.hot&&!g.off?'<span class="badge">Más pedido</span>':'')+pic(g)+'</div><div class="info">'
       +'<h3>'+esc(g.name)+'</h3>'+(g.desc?'<p class="desc">'+esc(g.desc)+'</p>':'')
       +(g.vars.length>1?'<div class="sizes" role="group" aria-label="Tamaño de '+esc(g.name)+'">'+g.vars.map(function(x,j){return '<button type="button" class="size" data-act="size" data-g="'+esc(g.key)+'" data-i="'+j+'" data-f="s-'+esc(x.id)+'" aria-pressed="'+(x===v)+'"'+(x.off?' disabled title="Agotado"':'')+'>'+esc(x.label||('Opción '+(j+1)))+'</button>'}).join('')+'</div>':'')
-      +'<div class="buy"><div class="pr"><span class="price">'+money(v.price)+'</span>'+(sub?'<small>'+esc(sub)+'</small>':'')+'</div>'
+      +'<div class="buy"><div class="pr"><span class="price">'+money(v.price)+'</span>'+(sub?'<small>'+esc(sub)+'</small>':'')+'</div>'+(!g.off?'<span class="lead'+(v.lead?'':' today')+'">'+leadTxt(v.lead)+'</span>':'')
       +(g.off?'<span class="soldtag">Agotado</span>':q?stepper(v.id,'g',q,varName(v)):'<button type="button" class="btn" data-act="add" data-id="'+esc(v.id)+'" data-f="a-'+esc(v.id)+'">Agregar</button>')
       +'</div></div></article>';
   }).join('');
@@ -488,6 +492,17 @@ function render(focus,pop){
 /* ---------- Pedido ---------- */
 function lines(){return Object.keys(cart).filter(function(id){return byVar[id]&&cart[id]>0}).map(function(id){var v=byVar[id];return {id:id,q:cart[id],v:v,name:v.g.name,sub:varSub(v),total:v.price*cart[id]}})}
 function modo(){return $('e-envio').checked?'Envío':'Retiro en el local'}
+function sumarDias(iso,d){var x=new Date(iso+'T12:00:00Z');x.setUTCDate(x.getUTCDate()+d);return x.toISOString().slice(0,10)}
+function leadTxt(d){return d===0?'Disponible para hoy':d===1?'Pedilo con 24 hs':'Pedilo con '+d*24+' hs'}
+/* Desde qué día se puede pagar: lo marca el producto del pedido que más anticipación necesita */
+function refreshDesde(){
+  if(!CFG.hoy)return;
+  var ls=lines(),d=ls.length?Math.max.apply(null,ls.map(function(l){return l.v.lead})):CFG.anticipacion;
+  CFG.desde=sumarDias(CFG.hoy,d);
+  var f=$('f-fecha'),min=CFG.cercano==='consultar'&&CFG.wa?CFG.hoy:CFG.desde;
+  f.min=min;if(f.value&&f.value<min)f.value='';
+  $('fecha-hint').textContent=CFG.cercano==='consultar'&&CFG.wa?(CFG.desde===CFG.hoy?'Tu pedido se puede pagar online para hoy o cualquier día.':'Con pago online, a partir del '+fechaLinda(CFG.desde)+'. Para antes, consultanos disponibilidad.'):'Tomamos este pedido a partir del '+fechaLinda(CFG.desde)+'.';
+}
 function consulta(){var fe=$('f-fecha').value;return CFG.cercano==='consultar'&&!!CFG.wa&&!!fe&&!!CFG.desde&&fe<CFG.desde&&(!CFG.hoy||fe>=CFG.hoy)}
 function totals(){
   var ls=lines(),sub=ls.reduce(function(s,l){return s+l.total},0);
@@ -497,6 +512,7 @@ function totals(){
   return {ls:ls,count:ls.reduce(function(s,l){return s+l.q},0),sub:sub,envio:envio,total:total,ahora:ahora,sena:sena};
 }
 function renderCart(){
+  refreshDesde();
   var t=totals();
   $('top-count').textContent=t.count;
   if(lastCount>=0&&t.count!==lastCount){var c=$('top-cart');c.classList.remove('bump');void c.offsetWidth;c.classList.add('bump')}
@@ -526,10 +542,9 @@ function applyConfig(){
   $('pago-opts').hidden=!(CFG.sena>0);
   $('sena-lbl').textContent='Seña del '+CFG.sena+'%';
   if(!(CFG.sena>0))$('p-total').checked=true;
-  var f=$('f-fecha'),min=CFG.cercano==='consultar'&&CFG.wa?CFG.hoy:CFG.desde;
-  if(min){f.min=min;if(f.value&&f.value<min)f.value=''}
-  $('fecha-hint').textContent=!CFG.desde?'':CFG.cercano==='consultar'&&CFG.wa?'Con pago online, a partir del '+fechaLinda(CFG.desde)+'. Para antes, consultanos disponibilidad.':'Tomamos pedidos a partir del '+fechaLinda(CFG.desde)+'.';
-  $('fact-anticipo').textContent=CFG.anticipacion?'Pedidos con '+(CFG.anticipacion*24)+' hs de anticipación':'Pedidos para hoy o cuando quieras';
+  refreshDesde();
+  var leads=Object.keys(byVar).map(function(k){return byVar[k].lead}),hayHoy=leads.indexOf(0)>=0,todosHoy=leads.length&&leads.every(function(d){return d===0});
+  $('fact-anticipo').textContent=todosHoy?'Pedidos para hoy o cuando quieras':hayHoy?'Productos para hoy y por encargo':'Pedidos con '+(CFG.anticipacion*24)+' hs de anticipación';
 }
 
 /* ---------- Validación ---------- */
@@ -540,7 +555,7 @@ function check(){
   function f(id,cond,msg){if(attempted)setErr(id,cond?msg:'');if(cond)bad.push(id)}
   if(modo()==='Envío')f('f-dir',!$('f-dir').value.trim(),'Escribí la dirección de entrega.');else setErr('f-dir','');
   var fe=$('f-fecha').value;
-  f('f-fecha',!fe||(!consulta()&&CFG.desde&&fe<CFG.desde),!fe?'Elegí para qué día es el pedido.':'Tomamos pedidos a partir del '+fechaLinda(CFG.desde)+'.');
+  f('f-fecha',!fe||(!consulta()&&CFG.desde&&fe<CFG.desde),!fe?'Elegí para qué día es el pedido.':'Este pedido se puede hacer a partir del '+fechaLinda(CFG.desde)+'.');
   f('f-nombre',!$('f-nombre').value.trim(),'Escribí tu nombre.');
   f('f-tel',$('f-tel').value.replace(/\D/g,'').length<8,'Escribí tu WhatsApp, con característica.');
   return bad[0]||null;

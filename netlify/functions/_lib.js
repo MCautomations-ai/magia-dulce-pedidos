@@ -70,7 +70,10 @@ async function mp(path, opts) {
   return data;
 }
 
+// Días de anticipación que necesita un producto: los suyos de la planilla, o la anticipación general.
+const diasProducto = (p, cfg) => (p && p.lead != null && p.lead !== '' && Number.isFinite(Number(p.lead)) ? Math.max(0, Number(p.lead)) : cfg.anticipacion);
+
 const money = (n) => '$' + Number(n).toLocaleString('es-AR');
 const REF = /^MD-[A-Z0-9]{8}$/;
 
-module.exports = { reply, need, config, hoyAR, sumarDias, fechaLinda, getMenu, mp, money, REF };
+module.exports = { reply, need, config, hoyAR, sumarDias, fechaLinda, getMenu, mp, money, REF, diasProducto };

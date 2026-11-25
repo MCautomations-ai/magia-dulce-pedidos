@@ -1,20 +1,20 @@
-ID,Categoría,Producto,Tamaño,Descripción,Precio,Foto,Destacado,Agotado
-chocotorta-ch,Tortas,Chocotorta,Chica · 10 porciones,"Galletitas de chocolate, dulce de leche y queso crema.",38000,,Sí,
-chocotorta-gr,Tortas,Chocotorta,Grande · 18 porciones,"Galletitas de chocolate, dulce de leche y queso crema.",56000,,Sí,
-rogel-ch,Tortas,Rogel,Chica · 10 porciones,Capas crocantes con dulce de leche y merengue italiano.,40000,,,
-rogel-gr,Tortas,Rogel,Grande · 18 porciones,Capas crocantes con dulce de leche y merengue italiano.,58000,,,
-selva-ch,Tortas,Selva Negra,Chica · 10 porciones,"Bizcochuelo de chocolate, crema chantilly y cerezas.",44000,,,
-selva-gr,Tortas,Selva Negra,Grande · 18 porciones,"Bizcochuelo de chocolate, crema chantilly y cerezas.",62000,,,
-redvelvet-ch,Tortas,Red Velvet,Chica · 10 porciones,Bizcochuelo rojo aterciopelado con frosting de queso.,46000,,Sí,
-redvelvet-gr,Tortas,Red Velvet,Grande · 18 porciones,Bizcochuelo rojo aterciopelado con frosting de queso.,66000,,Sí,
-cheesecake-ch,Tortas,Cheesecake de frutos rojos,Chica · 8 porciones,"Base de galletitas, crema de queso y salsa de frutos rojos.",42000,,,
-cheesecake-gr,Tortas,Cheesecake de frutos rojos,Grande · 14 porciones,"Base de galletitas, crema de queso y salsa de frutos rojos.",60000,,,
-lemonpie,Tartas,Lemon pie,8 porciones,Crema de limón y merengue dorado al soplete.,32000,,,
-frutillas,Tartas,Tarta de frutillas,8 porciones,"Masa sablée, crema pastelera y frutillas frescas.",34000,,,
-pastafrola,Tartas,Pastafrola de membrillo,8 porciones,"La de siempre, con enrejado y mucho membrillo.",18000,,,
-alfajores,Para compartir,Alfajores de maicena,Caja x 6,Con dulce de leche y coco rallado.,9000,,,
-brownies,Para compartir,Brownies con nuez,Caja x 4,"Húmedos por dentro, con chocolate semiamargo.",10000,,,
-cupcakes,Para compartir,Cupcakes surtidos,Caja x 6,Vainilla y chocolate con buttercream.,15000,,,
-macarons,Para compartir,Macarons,Caja x 12,"Frambuesa, pistacho y limón.",22000,,,
-desayuno,Boxes,Box desayuno,Para 2 personas,"Medialunas, budín, alfajores, jugo y una tarjeta con tu mensaje.",28000,,,
-mesadulce,Boxes,Mesa dulce,Para 10 personas,"Mini tartas, shots, brownies y cupcakes para tu festejo.",65000,,,
+ID,Categoría,Producto,Tamaño,Descripción,Precio,Foto,Destacado,Agotado,Anticipación
+chocotorta-ch,Tortas,Chocotorta,Chica · 10 porciones,"Galletitas de chocolate, dulce de leche y queso crema.",38000,,Sí,,2
+chocotorta-gr,Tortas,Chocotorta,Grande · 18 porciones,"Galletitas de chocolate, dulce de leche y queso crema.",56000,,Sí,,2
+rogel-ch,Tortas,Rogel,Chica · 10 porciones,Capas crocantes con dulce de leche y merengue italiano.,40000,,,,2
+rogel-gr,Tortas,Rogel,Grande · 18 porciones,Capas crocantes con dulce de leche y merengue italiano.,58000,,,,2
+selva-ch,Tortas,Selva Negra,Chica · 10 porciones,"Bizcochuelo de chocolate, crema chantilly y cerezas.",44000,,,,2
+selva-gr,Tortas,Selva Negra,Grande · 18 porciones,"Bizcochuelo de chocolate, crema chantilly y cerezas.",62000,,,,2
+redvelvet-ch,Tortas,Red Velvet,Chica · 10 porciones,Bizcochuelo rojo aterciopelado con frosting de queso.,46000,,Sí,,2
+redvelvet-gr,Tortas,Red Velvet,Grande · 18 porciones,Bizcochuelo rojo aterciopelado con frosting de queso.,66000,,Sí,,2
+cheesecake-ch,Tortas,Cheesecake de frutos rojos,Chica · 8 porciones,"Base de galletitas, crema de queso y salsa de frutos rojos.",42000,,,,2
+cheesecake-gr,Tortas,Cheesecake de frutos rojos,Grande · 14 porciones,"Base de galletitas, crema de queso y salsa de frutos rojos.",60000,,,,2
+lemonpie,Tartas,Lemon pie,8 porciones,Crema de limón y merengue dorado al soplete.,32000,,,,1
+frutillas,Tartas,Tarta de frutillas,8 porciones,"Masa sablée, crema pastelera y frutillas frescas.",34000,,,,1
+pastafrola,Tartas,Pastafrola de membrillo,8 porciones,"La de siempre, con enrejado y mucho membrillo.",18000,,,,1
+alfajores,Para compartir,Alfajores de maicena,Caja x 6,Con dulce de leche y coco rallado.,9000,,,,0
+brownies,Para compartir,Brownies con nuez,Caja x 4,"Húmedos por dentro, con chocolate semiamargo.",10000,,,,0
+cupcakes,Para compartir,Cupcakes surtidos,Caja x 6,Vainilla y chocolate con buttercream.,15000,,,,0
+macarons,Para compartir,Macarons,Caja x 12,"Frambuesa, pistacho y limón.",22000,,,,0
+desayuno,Boxes,Box desayuno,Para 2 personas,"Medialunas, budín, alfajores, jugo y una tarjeta con tu mensaje.",28000,,,,1
+mesadulce,Boxes,Mesa dulce,Para 10 personas,"Mini tartas, shots, brownies y cupcakes para tu festejo.",65000,,,,1

@@ -18,7 +18,8 @@ Tienda de pedidos con cobro por Mercado Pago, sobre la misma base que La Liria. 
 ### 1. Planilla (en el Drive de MC Automations)
 1. Crear una planilla nueva, por ejemplo "Magia Dulce · Pedidos".
 2. Renombrar la primera hoja a **Productos** e importar `apps-script/productos-ejemplo.csv` (Archivo > Importar > Subir > Reemplazar la hoja actual).
-3. Columnas de Productos: `ID | Categoría | Producto | Tamaño | Descripción | Precio | Foto | Destacado | Agotado`.
+3. Columnas de Productos: `ID | Categoría | Producto | Tamaño | Descripción | Precio | Foto | Destacado | Agotado | Anticipación`.
+   - Anticipación: días que necesita ese producto (`0` = se puede pedir y pagar para hoy). Vacía: se usa `ANTICIPACION_DIAS`. Si un pedido mezcla productos, manda el que más días necesita.
    - Cada tamaño va en su propia fila con el mismo Producto y Categoría: la tienda los agrupa y muestra los botones de tamaño.
    - En Tamaño se puede agregar un detalle después de un punto medio: `Grande · 18 porciones`.
    - Destacado y Agotado: escribir `Sí` (o tildar una casilla).
@@ -48,7 +49,7 @@ Tienda de pedidos con cobro por Mercado Pago, sobre la misma base que La Liria. 
 | `WA_NUMBER` | WhatsApp de Magia Dulce, con código de país y sin signos (ej: `5491123456789`) |
 | `ENVIO_COSTO` | Costo fijo del envío en pesos (ej: `3500`). Vacío o `0`: el envío se muestra "a coordinar" |
 | `SENA_PORCENTAJE` | Porcentaje de seña (ej: `50`). Vacío o `0`: solo pago total |
-| `ANTICIPACION_DIAS` | Días de anticipación para tomar pedidos (por defecto `2`) |
+| `ANTICIPACION_DIAS` | Anticipación general, para los productos que no tienen la suya en la planilla (por defecto `2`) |
 | `FECHA_CERCANA` | Qué pasa si eligen una fecha con menos anticipación. Vacío (por defecto): la web ofrece **consultar disponibilidad por WhatsApp**, sin cobrar online. `bloquear`: esas fechas no se pueden elegir |
 
 4. Después de cargar o cambiar variables: Deploys > Trigger deploy.

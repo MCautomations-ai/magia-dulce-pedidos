@@ -1,5 +1,5 @@
 const crypto = require('crypto');
-const { reply, config, hoyAR, sumarDias, fechaLinda, getMenu, mp, money } = require('./_lib');
+const { reply, config, hoyAR, sumarDias, fechaLinda, getMenu, mp, money, diasProducto } = require('./_lib');
 
 const MODOS = ['Retiro en el local', 'Envío'];
 const clean = (s, max) => String(s == null ? '' : s).replace(/[\u0000-\u001f]/g, ' ').trim().slice(0, max);
@@ -22,9 +22,7 @@ exports.handler = async (event) => {
   if (telefono.replace(/\D/g, '').length < 8) return reply(400, { ok: false, error: 'Falta un WhatsApp de contacto.' });
   if (!modo) return reply(400, { ok: false, error: 'Elegí retiro o envío.' });
   if (modo === 'Envío' && !direccion) return reply(400, { ok: false, error: 'Falta la dirección de entrega.' });
-  const desde = sumarDias(hoyAR(), cfg.anticipacion);
   if (!fecha) return reply(400, { ok: false, error: 'Elegí para qué día es el pedido.' });
-  if (fecha < desde) return reply(400, { ok: false, error: 'Tomamos pedidos a partir del ' + fechaLinda(desde) + '.' });
   if (fecha > sumarDias(hoyAR(), 120)) return reply(400, { ok: false, error: 'Elegí una fecha más cercana.' });
   if (!Array.isArray(b.items) || !b.items.length || b.items.length > 40) return reply(400, { ok: false, error: 'El pedido está vacío.' });
 
@@ -44,6 +42,10 @@ exports.handler = async (event) => {
       items.push({ p, q });
     }
     if (faltan.length) return reply(409, { ok: false, error: 'Algunos productos ya no están disponibles. Actualizamos la lista.', agotados: faltan });
+
+    // La fecha tiene que respetar la anticipación del producto que más necesita.
+    const desde = sumarDias(hoyAR(), Math.max.apply(null, items.map((x) => diasProducto(x.p, cfg))));
+    if (fecha < desde) return reply(400, { ok: false, error: 'Para pagar online, este pedido se puede hacer a partir del ' + fechaLinda(desde) + '.' });
 
     const nombreItem = (p) => (p.size && p.size.toLowerCase() !== 'unidad' ? p.name + ' (' + p.size + ')' : p.name);
     const envio = modo === 'Envío' ? cfg.envio : 0;
