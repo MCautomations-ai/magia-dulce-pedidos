@@ -216,6 +216,10 @@ dialog::backdrop{background:var(--shade)}
 .sum dt{color:var(--muted)}.sum dd{margin:0;text-align:right;font-weight:700}
 .sum .big{color:var(--ink);font-weight:800;font-size:1.15rem}
 .fine{font-size:.85rem;color:var(--muted);margin:0}
+.near{margin:0;border-radius:12px;padding:10px 12px;background:var(--blush);font-size:.88rem;line-height:1.4}
+.near b{display:block}
+.btn.wa-btn{background:var(--wa);box-shadow:0 8px 16px -8px rgba(31,138,76,.7)}
+.btn.wa-btn svg{width:22px;height:22px}
 #note{margin:0;color:var(--err);font-weight:700;font-size:.92rem;text-align:center}
 #note:empty{display:none}
 
@@ -231,8 +235,8 @@ dialog::backdrop{background:var(--shade)}
 .steps li{display:flex;align-items:center;gap:10px;border-radius:14px;padding:10px 12px;background:var(--blush);font-weight:700;font-size:.92rem;line-height:1.25}
 .steps i{flex:none;width:28px;height:28px;border-radius:50%;display:grid;place-items:center;font-style:normal;font-weight:800;color:var(--on-red);background:var(--red)}
 .steps li.ok i{background:var(--ok)}
-.steps li.now{background:var(--surface);box-shadow:inset 0 0 0 2px var(--wa)}
-.steps li.now i{background:var(--wa)}
+.steps li.now{background:var(--surface);box-shadow:inset 0 0 0 2px var(--red)}
+.steps li.now i{background:var(--red)}
 .done-sum{white-space:pre-line;text-align:left;font-size:.93rem;line-height:1.5;margin:0;background:var(--bg);border-radius:14px;padding:14px}
 .wa{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;padding:16px 20px;border-radius:999px;background:var(--wa);color:#fff;font-weight:800;font-size:1.08rem;text-decoration:none;
   box-shadow:0 14px 26px -12px rgba(31,138,76,.8);animation:pulse 2.2s ease-in-out infinite}
@@ -320,7 +324,7 @@ dialog::backdrop{background:var(--shade)}
           <label class="opt"><input type="radio" name="entrega" id="e-envio" value="Envío"><b>Envío a domicilio</b><small id="envio-lbl">A coordinar</small></label>
         </div>
         <div class="field" id="dir-field" hidden><label for="f-dir" data-req>Dirección de entrega</label><input id="f-dir" autocomplete="street-address" placeholder="Calle, altura, piso y barrio"><p class="err" id="e-f-dir" hidden></p></div>
-        <div class="field"><label for="f-fecha" data-req>¿Para qué día?</label><input id="f-fecha" type="date"><p class="hint" id="fecha-hint"></p><p class="err" id="e-f-fecha" hidden></p></div>
+        <div class="field"><label for="f-fecha" data-req>¿Para qué día?</label><input id="f-fecha" type="date"><p class="hint" id="fecha-hint"></p><p class="err" id="e-f-fecha" hidden></p><p class="near" id="near" hidden></p></div>
       </div>
       <div class="sec"><h3>Tus datos</h3>
         <div class="field"><label for="f-nombre" data-req>Nombre</label><input id="f-nombre" autocomplete="name"><p class="err" id="e-f-nombre" hidden></p></div>
@@ -338,7 +342,7 @@ dialog::backdrop{background:var(--shade)}
     <div class="sfoot">
       <p id="note" role="alert"></p>
       <button class="btn" type="submit" id="pay">Pagar con Mercado Pago</button>
-      <p class="fine">Pagás de forma segura en Mercado Pago. Al volver, nos enviás el pedido por WhatsApp para confirmarlo.</p>
+      <p class="fine" id="pay-fine">Pagás de forma segura en Mercado Pago. Al volver, nos enviás el pedido por WhatsApp para confirmarlo.</p>
     </div>
   </form>
 </dialog>
@@ -360,8 +364,9 @@ dialog::backdrop{background:var(--shade)}
 </section>
 
 <script>
+var WA_ICON='<svg viewBox="0 0 24 24" aria-hidden="true" fill="currentColor"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2Zm0 18.2a8.2 8.2 0 0 1-4.2-1.1l-.3-.2-3 .8.8-2.9-.2-.3A8.2 8.2 0 1 1 12 20.2Zm4.5-6.1c-.2-.1-1.5-.7-1.7-.8-.2-.1-.4-.1-.6.1l-.8 1c-.1.2-.3.2-.5.1a6.7 6.7 0 0 1-3.3-2.9c-.2-.4.3-.4.8-1.3.1-.2 0-.3 0-.4l-.8-1.8c-.2-.5-.4-.4-.6-.4h-.5a1 1 0 0 0-.7.3 3 3 0 0 0-.9 2.2 5.2 5.2 0 0 0 1.1 2.7 11.9 11.9 0 0 0 4.6 4c1.7.7 2.3.8 3.2.7.5-.1 1.5-.6 1.8-1.2.2-.6.2-1.1.1-1.2l-.4-.2Z"/></svg>';
 var CAT_ORDER=['Tortas','Tartas','Para compartir','Boxes'];
-var groups=[],byVar={},CFG={envio:0,sena:0,anticipacion:2,desde:''};
+var groups=[],byVar={},CFG={envio:0,sena:0,anticipacion:2,hoy:'',desde:'',cercano:'bloquear',wa:''};
 var cart={},sel={},cat='todo',lastCount=-1,menuAt=0;
 var $=function(id){return document.getElementById(id)};
 var money=function(n){return '$ '+Number(n||0).toLocaleString('es-AR')};
@@ -483,6 +488,7 @@ function render(focus,pop){
 /* ---------- Pedido ---------- */
 function lines(){return Object.keys(cart).filter(function(id){return byVar[id]&&cart[id]>0}).map(function(id){var v=byVar[id];return {id:id,q:cart[id],v:v,name:v.g.name,sub:varSub(v),total:v.price*cart[id]}})}
 function modo(){return $('e-envio').checked?'Envío':'Retiro en el local'}
+function consulta(){var fe=$('f-fecha').value;return CFG.cercano==='consultar'&&!!CFG.wa&&!!fe&&!!CFG.desde&&fe<CFG.desde&&(!CFG.hoy||fe>=CFG.hoy)}
 function totals(){
   var ls=lines(),sub=ls.reduce(function(s,l){return s+l.total},0);
   var envio=modo()==='Envío'&&ls.length?CFG.envio:0,total=sub+envio;
@@ -507,7 +513,12 @@ function renderCart(){
   rows+='<dt>Total</dt><dd>'+money(t.total)+'</dd><dt class="big">Pagás ahora</dt><dd class="big">'+money(t.ahora)+'</dd>';
   if(t.sena)rows+='<dt>Saldo al recibirlo</dt><dd>'+money(t.total-t.ahora)+'</dd>';
   $('sum').innerHTML=rows;
-  if(!$('pay').disabled)$('pay').textContent=t.ls.length?'Pagar '+money(t.ahora)+' con Mercado Pago':'Pagar con Mercado Pago';
+  var cq=consulta();
+  $('near').hidden=!cq;
+  if(cq)$('near').innerHTML='<b>Para el '+fechaLinda($('f-fecha').value)+' tenemos que confirmar disponibilidad.</b>Envianos la consulta por WhatsApp con tu pedido armado y te respondemos cómo seguir. Para pagar online ahora, elegí una fecha desde el '+fechaLinda(CFG.desde)+'.';
+  $('pay').classList.toggle('wa-btn',cq);
+  $('pay-fine').textContent=cq?'Todavía no se cobra nada: se abre WhatsApp con tu pedido para consultar.':'Pagás de forma segura en Mercado Pago. Al volver, nos enviás el pedido por WhatsApp para confirmarlo.';
+  if(!$('pay').disabled)$('pay').innerHTML=cq?WA_ICON+'Consultar disponibilidad por WhatsApp':t.ls.length?'Pagar '+money(t.ahora)+' con Mercado Pago':'Pagar con Mercado Pago';
   $('pay').hidden=!t.ls.length;
 }
 function applyConfig(){
@@ -515,8 +526,9 @@ function applyConfig(){
   $('pago-opts').hidden=!(CFG.sena>0);
   $('sena-lbl').textContent='Seña del '+CFG.sena+'%';
   if(!(CFG.sena>0))$('p-total').checked=true;
-  var f=$('f-fecha');if(CFG.desde){f.min=CFG.desde;if(f.value&&f.value<CFG.desde)f.value=''}
-  $('fecha-hint').textContent=CFG.desde?'Tomamos pedidos a partir del '+fechaLinda(CFG.desde)+'.':'';
+  var f=$('f-fecha'),min=CFG.cercano==='consultar'&&CFG.wa?CFG.hoy:CFG.desde;
+  if(min){f.min=min;if(f.value&&f.value<min)f.value=''}
+  $('fecha-hint').textContent=!CFG.desde?'':CFG.cercano==='consultar'&&CFG.wa?'Con pago online, a partir del '+fechaLinda(CFG.desde)+'. Para antes, consultanos disponibilidad.':'Tomamos pedidos a partir del '+fechaLinda(CFG.desde)+'.';
   $('fact-anticipo').textContent=CFG.anticipacion?'Pedidos con '+(CFG.anticipacion*24)+' hs de anticipación':'Pedidos para hoy o cuando quieras';
 }
 
@@ -528,7 +540,7 @@ function check(){
   function f(id,cond,msg){if(attempted)setErr(id,cond?msg:'');if(cond)bad.push(id)}
   if(modo()==='Envío')f('f-dir',!$('f-dir').value.trim(),'Escribí la dirección de entrega.');else setErr('f-dir','');
   var fe=$('f-fecha').value;
-  f('f-fecha',!fe||(CFG.desde&&fe<CFG.desde),!fe?'Elegí para qué día es el pedido.':'Tomamos pedidos a partir del '+fechaLinda(CFG.desde)+'.');
+  f('f-fecha',!fe||(!consulta()&&CFG.desde&&fe<CFG.desde),!fe?'Elegí para qué día es el pedido.':'Tomamos pedidos a partir del '+fechaLinda(CFG.desde)+'.');
   f('f-nombre',!$('f-nombre').value.trim(),'Escribí tu nombre.');
   f('f-tel',$('f-tel').value.replace(/\D/g,'').length<8,'Escribí tu WhatsApp, con característica.');
   return bad[0]||null;
@@ -586,6 +598,17 @@ $('form').addEventListener('submit',function(e){
   attempted=true;
   var bad=check();
   if(bad){$(bad).focus({preventScroll:true});$(bad).scrollIntoView({block:'center',behavior:calm()?'auto':'smooth'});return}
+  if(consulta()){
+    var msg='¡Hola Magia Dulce! Quería consultar si tienen disponibilidad para este pedido:\n\n'
+      +t.ls.map(function(l){return l.q+' x '+varName(l.v)+' · '+money(l.total)}).join('\n')
+      +'\n\nPara el día: '+fechaLinda($('f-fecha').value)
+      +'\n'+(modo()==='Envío'?'Envío a: '+$('f-dir').value.trim():'Retiro en el local')
+      +'\nNombre: '+$('f-nombre').value.trim()+'\nMi WhatsApp: '+$('f-tel').value.trim()
+      +($('f-nota').value.trim()?'\nAclaraciones: '+$('f-nota').value.trim():'');
+    window.open('https://wa.me/'+encodeURIComponent(CFG.wa)+'?text='+encodeURIComponent(msg),'_blank','noopener');
+    $('note').textContent='';
+    return;
+  }
   function fail(m){payBtn.disabled=false;renderCart();$('note').textContent=m}
   payBtn.disabled=true;payBtn.textContent='Preparando el pago…';$('note').textContent='';
   var body={items:t.ls.map(function(l){return {id:l.id,q:l.q}}),cliente:$('f-nombre').value.trim(),telefono:$('f-tel').value.trim(),modo:modo(),
@@ -602,7 +625,6 @@ $('form').addEventListener('submit',function(e){
 window.addEventListener('pageshow',function(e){if(e.persisted){payBtn.disabled=false;renderCart()}});
 
 /* ---------- Vuelta desde Mercado Pago ---------- */
-var WA_ICON='<svg viewBox="0 0 24 24" aria-hidden="true" fill="currentColor"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2Zm0 18.2a8.2 8.2 0 0 1-4.2-1.1l-.3-.2-3 .8.8-2.9-.2-.3A8.2 8.2 0 1 1 12 20.2Zm4.5-6.1c-.2-.1-1.5-.7-1.7-.8-.2-.1-.4-.1-.6.1l-.8 1c-.1.2-.3.2-.5.1a6.7 6.7 0 0 1-3.3-2.9c-.2-.4.3-.4.8-1.3.1-.2 0-.3 0-.4l-.8-1.8c-.2-.5-.4-.4-.6-.4h-.5a1 1 0 0 0-.7.3 3 3 0 0 0-.9 2.2 5.2 5.2 0 0 0 1.1 2.7 11.9 11.9 0 0 0 4.6 4c1.7.7 2.3.8 3.2.7.5-.1 1.5-.6 1.8-1.2.2-.6.2-1.1.1-1.2l-.4-.2Z"/></svg>';
 function doneSet(o){
   $('doneTop').innerHTML=o.top||'';
   $('doneH').textContent=o.title;$('doneSub').textContent=o.sub||'';

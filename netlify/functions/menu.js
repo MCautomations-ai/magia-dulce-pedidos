@@ -8,7 +8,8 @@ exports.handler = async () => {
       ok: true,
       items,
       // Reglas para la tienda: costo de envío, seña y desde qué día se toman pedidos.
-      config: { envio: c.envio, sena: c.sena, anticipacion: c.anticipacion, desde: sumarDias(hoyAR(), c.anticipacion) }
+      config: { envio: c.envio, sena: c.sena, anticipacion: c.anticipacion, hoy: hoyAR(), desde: sumarDias(hoyAR(), c.anticipacion),
+        cercano: c.cercano === 'consultar' && c.wa ? 'consultar' : 'bloquear', wa: c.cercano === 'consultar' ? c.wa : '' }
     }, { 'Cache-Control': 'public, max-age=30' });
   } catch (e) {
     console.error('menu', e.message);

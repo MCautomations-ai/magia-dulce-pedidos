@@ -49,6 +49,7 @@ Tienda de pedidos con cobro por Mercado Pago, sobre la misma base que La Liria. 
 | `ENVIO_COSTO` | Costo fijo del envío en pesos (ej: `3500`). Vacío o `0`: el envío se muestra "a coordinar" |
 | `SENA_PORCENTAJE` | Porcentaje de seña (ej: `50`). Vacío o `0`: solo pago total |
 | `ANTICIPACION_DIAS` | Días de anticipación para tomar pedidos (por defecto `2`) |
+| `FECHA_CERCANA` | Qué pasa si eligen una fecha con menos anticipación. Vacío (por defecto): la web ofrece **consultar disponibilidad por WhatsApp**, sin cobrar online. `bloquear`: esas fechas no se pueden elegir |
 
 4. Después de cargar o cambiar variables: Deploys > Trigger deploy.
 
@@ -63,4 +64,5 @@ Estas claves no van en el código ni en GitHub: solo en Netlify.
 ## Mantenimiento del día a día
 - **Precios, productos, agotados:** se cambian en la hoja Productos. La web los toma en menos de un minuto.
 - **Fotos:** subirlas a `fotos/` en GitHub (jpg o webp, idealmente 1200 px de ancho y menos de 300 KB) y escribir el nombre del archivo en la columna Foto. También sirve un link `https://` a una imagen.
+- **Fechas cercanas:** si alguien pide para antes de la anticipación, la web no cobra: arma el pedido y abre WhatsApp con un mensaje de consulta. Si hay disponibilidad, el pago se coordina por ahí.
 - **Sección de temporada (ej. fiestas):** crear una categoría nueva en la hoja (ej. `Fiestas`) con sus productos; aparece sola como botón en la tienda.

@@ -28,6 +28,8 @@ function config() {
     envio: Math.round(num(process.env.ENVIO_COSTO, 0)), // 0 = el envío se coordina aparte
     sena: sena > 0 && sena < 100 ? sena : 0, // 0 = solo pago total
     anticipacion: Math.max(0, Math.round(num(process.env.ANTICIPACION_DIAS, 2))),
+    // Pedidos para antes de la anticipación: 'consultar' (por WhatsApp, sin pago online) o 'bloquear'.
+    cercano: /^bloquear$/i.test(process.env.FECHA_CERCANA || '') ? 'bloquear' : 'consultar',
     wa: (process.env.WA_NUMBER || '').replace(/\D/g, '')
   };
 }
